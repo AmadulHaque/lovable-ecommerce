@@ -9,6 +9,17 @@ export interface Product {
   rating: number;
   reviews: number;
   badge?: string;
+  userReviews?: ProductReview[];
+}
+
+export interface ProductReview {
+  id: string;
+  productId: string;
+  rating: number;
+  comment: string;
+  reviewerName: string;
+  date: string;
+  verified?: boolean;
 }
 
 export interface CartItem extends Product {

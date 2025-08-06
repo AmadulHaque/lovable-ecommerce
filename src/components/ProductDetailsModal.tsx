@@ -1,8 +1,9 @@
-import { Product } from '@/types/product';
+import { Product, ProductReview } from '@/types/product';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Star, ShoppingCart, Zap } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { Star, ShoppingCart, Zap, MessageSquare, User, Calendar } from 'lucide-react';
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -10,6 +11,7 @@ interface ProductDetailsModalProps {
   onClose: () => void;
   onAddToCart: (product: Product) => void;
   onBuyNow: (product: Product) => void;
+  onWriteReview: (product: Product) => void;
 }
 
 export const ProductDetailsModal = ({ 
@@ -17,7 +19,8 @@ export const ProductDetailsModal = ({
   isOpen, 
   onClose, 
   onAddToCart, 
-  onBuyNow 
+  onBuyNow,
+  onWriteReview
 }: ProductDetailsModalProps) => {
   if (!product) return null;
 
@@ -26,9 +29,20 @@ export const ProductDetailsModal = ({
     ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
     : 0;
 
+  const renderStars = (rating: number) => {
+    return [...Array(5)].map((_, i) => (
+      <Star
+        key={i}
+        className={`w-4 h-4 ${
+          i < rating ? 'fill-accent text-accent' : 'text-muted-foreground'
+        }`}
+      />
+    ));
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-left">{product.name}</DialogTitle>
         </DialogHeader>
@@ -71,8 +85,8 @@ export const ProductDetailsModal = ({
             {/* Rating */}
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="font-medium">{product.rating}</span>
+                {renderStars(product.rating)}
+                <span className="font-medium ml-1">{product.rating}</span>
               </div>
               <span className="text-muted-foreground">
                 ({product.reviews} reviews)
@@ -102,18 +116,64 @@ export const ProductDetailsModal = ({
                 Buy Now
               </Button>
               
-              <Button 
-                onClick={() => onAddToCart(product)}
-                variant="outline"
-                className="w-full"
-                size="lg"
-              >
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Add to Cart
-              </Button>
+              <div className="grid grid-cols-2 gap-3">
+                <Button 
+                  onClick={() => onAddToCart(product)}
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                >
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Add to Cart
+                </Button>
+                <Button
+                  onClick={() => onWriteReview(product)}
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Write Review
+                </Button>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Customer Reviews Section */}
+        {product.userReviews && product.userReviews.length > 0 && (
+          <>
+            <Separator className="my-6" />
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Customer Reviews</h3>
+              <div className="space-y-4 max-h-60 overflow-y-auto">
+                {product.userReviews.slice(0, 5).map((review) => (
+                  <div key={review.id} className="border rounded-lg p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <User className="w-4 h-4 text-muted-foreground" />
+                        <span className="font-medium text-sm">{review.reviewerName}</span>
+                        {review.verified && (
+                          <Badge variant="outline" className="text-xs">Verified</Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="flex">
+                          {renderStars(review.rating)}
+                        </div>
+                        <div className="flex items-center text-xs text-muted-foreground">
+                          <Calendar className="w-3 h-3 mr-1" />
+                          {new Date(review.date).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{review.comment}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

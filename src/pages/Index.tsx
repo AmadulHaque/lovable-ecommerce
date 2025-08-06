@@ -3,12 +3,14 @@ import { products } from '@/data/products';
 import { useCart } from '@/hooks/useCart';
 import { Header } from '@/components/Header';
 import { Hero } from '@/components/Hero';
+import { ReviewsSlider } from '@/components/ReviewsSlider';
 import { ProductCard } from '@/components/ProductCard';
 import { CartSidebar } from '@/components/CartSidebar';
 import { CheckoutModal } from '@/components/CheckoutModal';
 import { ProductDetailsModal } from '@/components/ProductDetailsModal';
+import { ProductReviewModal } from '@/components/ProductReviewModal';
 import { useToast } from '@/hooks/use-toast';
-import { Product } from '@/types/product';
+import { Product, ProductReview } from '@/types/product';
 
 const Index = () => {
   const {
@@ -26,6 +28,8 @@ const Index = () => {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isProductDetailsOpen, setIsProductDetailsOpen] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [productReviews, setProductReviews] = useState<ProductReview[]>([]);
   const productsRef = useRef<HTMLElement>(null);
   const { toast } = useToast();
 
@@ -67,6 +71,42 @@ const Index = () => {
     });
   };
 
+  const handleWriteReview = (product: Product) => {
+    setSelectedProduct(product);
+    setIsProductDetailsOpen(false);
+    setIsReviewModalOpen(true);
+  };
+
+  const handleSubmitReview = (reviewData: {
+    productId: string;
+    rating: number;
+    comment: string;
+    reviewerName: string;
+  }) => {
+    const newReview: ProductReview = {
+      id: Date.now().toString(),
+      productId: reviewData.productId,
+      rating: reviewData.rating,
+      comment: reviewData.comment,
+      reviewerName: reviewData.reviewerName,
+      date: new Date().toISOString(),
+      verified: false,
+    };
+
+    setProductReviews(prev => [...prev, newReview]);
+    setIsReviewModalOpen(false);
+  };
+
+  // Get product with reviews
+  const getProductWithReviews = (product: Product): Product => {
+    const reviews = productReviews.filter(review => review.productId === product.id);
+    return {
+      ...product,
+      userReviews: reviews,
+      reviews: product.reviews + reviews.length,
+    };
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header 
@@ -75,6 +115,8 @@ const Index = () => {
       />
       
       <Hero onShopNow={handleShopNow} />
+      
+      <ReviewsSlider />
       
       <section ref={productsRef} className="py-16 lg:py-24">
         <div className="container mx-auto px-4">
@@ -119,7 +161,7 @@ const Index = () => {
       />
 
       <ProductDetailsModal
-        product={selectedProduct}
+        product={selectedProduct ? getProductWithReviews(selectedProduct) : null}
         isOpen={isProductDetailsOpen}
         onClose={() => setIsProductDetailsOpen(false)}
         onAddToCart={(product) => {
@@ -127,6 +169,14 @@ const Index = () => {
           setIsProductDetailsOpen(false);
         }}
         onBuyNow={handleBuyNow}
+        onWriteReview={handleWriteReview}
+      />
+
+      <ProductReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        product={selectedProduct}
+        onSubmitReview={handleSubmitReview}
       />
     </div>
   );
