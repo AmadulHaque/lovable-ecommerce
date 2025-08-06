@@ -7,9 +7,10 @@ import { Star, ShoppingCart } from 'lucide-react';
 interface ProductCardProps {
   product: Product;
   onAddToCart: (product: Product) => void;
+  onProductClick: (product: Product) => void;
 }
 
-export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
+export const ProductCard = ({ product, onAddToCart, onProductClick }: ProductCardProps) => {
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
   const discountPercentage = hasDiscount 
     ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
@@ -17,7 +18,7 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
 
   return (
     <Card className="group h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-border/50">
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden cursor-pointer" onClick={() => onProductClick(product)}>
         <img
           src={product.image}
           alt={product.name}
@@ -41,7 +42,7 @@ export const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
       </div>
       
       <CardContent className="p-4 space-y-3">
-        <div className="space-y-1">
+        <div className="space-y-1 cursor-pointer" onClick={() => onProductClick(product)}>
           <p className="text-xs text-muted-foreground uppercase tracking-wide">
             {product.category}
           </p>

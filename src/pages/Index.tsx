@@ -6,7 +6,9 @@ import { Hero } from '@/components/Hero';
 import { ProductCard } from '@/components/ProductCard';
 import { CartSidebar } from '@/components/CartSidebar';
 import { CheckoutModal } from '@/components/CheckoutModal';
+import { ProductDetailsModal } from '@/components/ProductDetailsModal';
 import { useToast } from '@/hooks/use-toast';
+import { Product } from '@/types/product';
 
 const Index = () => {
   const {
@@ -22,6 +24,8 @@ const Index = () => {
   } = useCart();
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isProductDetailsOpen, setIsProductDetailsOpen] = useState(false);
   const productsRef = useRef<HTMLElement>(null);
   const { toast } = useToast();
 
@@ -45,6 +49,22 @@ const Index = () => {
   const handleOrderComplete = () => {
     clearCart();
     setIsCheckoutOpen(false);
+  };
+
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+    setIsProductDetailsOpen(true);
+  };
+
+  const handleBuyNow = (product: Product) => {
+    addToCart(product);
+    setIsProductDetailsOpen(false);
+    setIsCartOpen(false);
+    setIsCheckoutOpen(true);
+    toast({
+      title: "Added to cart!",
+      description: `${product.name} has been added to your cart and checkout opened.`,
+    });
   };
 
   return (
@@ -73,6 +93,7 @@ const Index = () => {
                 key={product.id}
                 product={product}
                 onAddToCart={handleAddToCart}
+                onProductClick={handleProductClick}
               />
             ))}
           </div>
@@ -95,6 +116,17 @@ const Index = () => {
         cart={cart}
         total={getCartTotal()}
         onOrderComplete={handleOrderComplete}
+      />
+
+      <ProductDetailsModal
+        product={selectedProduct}
+        isOpen={isProductDetailsOpen}
+        onClose={() => setIsProductDetailsOpen(false)}
+        onAddToCart={(product) => {
+          handleAddToCart(product);
+          setIsProductDetailsOpen(false);
+        }}
+        onBuyNow={handleBuyNow}
       />
     </div>
   );
