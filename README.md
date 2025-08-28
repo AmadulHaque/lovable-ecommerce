@@ -10,7 +10,7 @@ There are several ways of editing your application.
 
 **Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/8455e964-9132-4179-92ea-61a4964dbdc9) and start prompting.
+Simply visit the [Lovable Ecommerce Project](https://one-page-shop-star.vercel.app) and start prompting.
 
 Changes made via Lovable will be committed automatically to this repo.
 
